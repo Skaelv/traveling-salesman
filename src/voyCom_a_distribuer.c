@@ -251,7 +251,7 @@ void supprimer_aretes(const int nb_villes, double **T)
  * @param [n] T le tableau � supprimer
  */
 
-void pcv_exact_naif (int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
+void pcv_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
 	int i;
 	for(i = chemin->taille+1 ; i<n ; i++)
@@ -267,7 +267,7 @@ void pcv_exact_naif (int n , double ** dist ,t_cycle * chemin , t_cycle * meille
 		{
 			chemin->poids += dist[chemin->c[chemin->taille]][i];
 			chemin->taille++;
-			pvc_exact_naif(n,dist,chemin,meilleur);
+			pcv_exact_naif(n,dist,chemin,meilleur);
 			chemin->taille--;
 			chemin->poids-=dist[chemin->c[chemin->taille]][i];
 		}
