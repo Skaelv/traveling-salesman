@@ -251,7 +251,7 @@ void supprimer_aretes(const int nb_villes, double **T)
  * @param [n] T le tableau � supprimer
  */
 
-void pcv_exact_naif (int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
+void pcv_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
 	int i;
 	for(i = chemin->taille+1 ; i<n ; i++)
@@ -267,7 +267,7 @@ void pcv_exact_naif (int n , double ** dist ,t_cycle * chemin , t_cycle * meille
 		{
 			chemin->poids += dist[chemin->c[chemin->taille]][i];
 			chemin->taille++;
-			pvc_exact_naif(n,dist,chemin,meilleur);
+			pcv_exact_naif( n, dist, chemin, meilleur);
 			chemin->taille--;
 			chemin->poids-=dist[chemin->c[chemin->taille]][i];
 		}
@@ -285,14 +285,17 @@ int main (int argc, char *argv[])
   double *abscisses;
   double *ordonnees;
   unsigned int nb_villes;
-  
+  t_cycle * chemin;
+  t_cycle * meilleur;
+
+  //Exemple de mesure du temps
+  lire_donnees("defi10.csv", &nb_villes, &distances, &abscisses, &ordonnees);
+
   //Initialisation du timer pour mesurer des temps (compiler avec -lrt) 
   struct timespec myTimerStart;
   clock_gettime(CLOCK_REALTIME, &myTimerStart);
 
-  //Exemple de mesure du temps
-  lire_donnees("defi250.csv", &nb_villes, &distances, &abscisses, &ordonnees);
-
+  pcv_exact_naif(10,distances,chemin,meilleur);
   //R�cup�ration du timer et affichage
   struct timespec current;
   clock_gettime(CLOCK_REALTIME, &current); //Linux gettime
@@ -305,6 +308,7 @@ int main (int argc, char *argv[])
   //afficher_distances(nb_villes,distances);
 
   //naif
+
   t_cycle cycle;
   cycle.taille=3;
   cycle.c[0]=0;
