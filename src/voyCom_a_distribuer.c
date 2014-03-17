@@ -251,29 +251,79 @@ void supprimer_aretes(const int nb_villes, double **T)
  * @param [n] T le tableau � supprimer
  */
 
-void pcv_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
+//void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
+//{
+//	int i;
+//		if (chemin->taille == n )
+//		{
+//
+//			//Comparaison entre chemin et meilleur
+//			if(chemin->poids < meilleur->poids){
+//				printf("Poids1 : %f",meilleur->poids);
+//				*meilleur = *chemin;//La valeur mais pas le pointeur!
+//				printf("Poids2 : %f",meilleur->poids);
+//
+////				meilleur->poids = chemin->poids;
+////				meilleur->taille = chemin->taille;
+////				int k;
+////				for (k = 0; k < MAXS; k++)
+////				{
+////					meilleur->c[k] = chemin->c[MAXS];
+////				}
+//			}
+//		}
+//		else
+//		{
+//
+//			chemin->poids += dist[chemin->c[chemin->taille]][i];
+//			chemin->taille++;
+//			chemin->c[chemin->taille]=i ;
+//			pvc_exact_naif( n, dist, chemin, meilleur);
+//			chemin->taille--;
+//			chemin->poids-=dist[chemin->c[chemin->taille]][i];
+//		}
+//	}
+//}
+
+
+void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
 	int i;
-	for(i = chemin->taille+1 ; i<n ; i++)
+
+	if (chemin->taille == n )
 	{
-		if (chemin->taille == n)
-		{
-			//Comparaison entre chemin et meilleur
-			if(chemin->poids < meilleur->poids){
-				meilleur = chemin; //La valeur mais pas le pointeur!
-			}
+
+		//Comparaison entre chemin et meilleur
+		if(chemin->poids < meilleur->poids){
+			*meilleur = *chemin;//La valeur mais pas le pointeur!
 		}
-		else
+	}
+	else
+	{
+
+		for(i = 0 ; i<n ; i++)
 		{
-			chemin->poids += dist[chemin->c[chemin->taille]][i];
-			chemin->taille++;
-			pcv_exact_naif( n, dist, chemin, meilleur);
-			chemin->taille--;
-			chemin->poids-=dist[chemin->c[chemin->taille]][i];
+			int j;
+			int bool=1;
+			for ( j = 0;j<chemin->taille; j++)
+			{
+				if (chemin->c[j] == i )
+				{
+					bool=0;
+				}
+			}
+			if (bool) //bool=1
+			{
+				chemin->poids += dist[chemin->c[chemin->taille]][i];
+				chemin->taille++;
+				chemin->c[chemin->taille]=i;
+				pvc_exact_naif( n, dist, chemin, meilleur);
+				chemin->taille--;
+				chemin->poids -= dist[chemin->c[chemin->taille]][i];
+			}
 		}
 	}
 }
-
 
 
 /**
@@ -285,17 +335,24 @@ int main (int argc, char *argv[])
   double *abscisses;
   double *ordonnees;
   unsigned int nb_villes;
-  t_cycle * chemin;
-  t_cycle * meilleur;
 
   //Exemple de mesure du temps
-  lire_donnees("defi10.csv", &nb_villes, &distances, &abscisses, &ordonnees);
+  lire_donnees("src/defi10.csv", &nb_villes, &distances, &abscisses, &ordonnees);
+  t_cycle chemin;
+  t_cycle meilleur;
+  	  //---------------------------Init des structs
+  chemin.taille = 0;
+  chemin.c[0]=0;
+  meilleur.taille = nb_villes;
+  meilleur.c[0]=0;
+
+
 
   //Initialisation du timer pour mesurer des temps (compiler avec -lrt) 
   struct timespec myTimerStart;
   clock_gettime(CLOCK_REALTIME, &myTimerStart);
 
-  pcv_exact_naif(10,distances,chemin,meilleur);
+  pvc_exact_naif(nb_villes,distances,&chemin,&meilleur);
   //R�cup�ration du timer et affichage
   struct timespec current;
   clock_gettime(CLOCK_REALTIME, &current); //Linux gettime
@@ -305,7 +362,7 @@ int main (int argc, char *argv[])
 
 
   //Affichage des distances
-  //afficher_distances(nb_villes,distances);
+//  afficher_distances(nb_villes,distances);
 
   //naif
 

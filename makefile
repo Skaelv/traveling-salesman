@@ -4,8 +4,6 @@ default: all
 all: bin/traveling-salesman
 	
 run: bin/traveling-salesman
-	./bin/traveling-salesman
-	
 	
 
 bin/traveling-salesman: src/voyCom_a_distribuer.c
