@@ -1,8 +1,8 @@
-#include<stdio.h> 
-#include<math.h>
+#include <time.h>
+#include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <sys/time.h>
 #include <assert.h>
 
@@ -15,32 +15,32 @@
 typedef struct t_cycle 
 {
   int taille;   //la taille du cycle en construction (Nb ville)
-  double poids; //le coût du cycle (distance parcourue)
+  double poids; //le coï¿½t du cycle (distance parcourue)
   int c[MAXS];  //liste des "taille" sommets
-} t_cycle;     
+} t_cycle;
 
- t_cycle* copie_cycle( const t_cycle src){
-	this.taille = src.taille;
-	this.poids = src.poids;
-	for(int i = 0 ; i < src.taille ; i++)
-	{
-		this.c[i]=src.c[i];
-	}
-	return *this;
-} 
+// t_cycle* copie_cycle( const t_cycle src){
+//	this.taille = src.taille;
+//	this.poids = src.poids;
+//	for(int i = 0 ; i < src.taille ; i++)
+//	{
+//		this.c[i]=src.c[i];
+//	}
+//	return *this;
+//}
 
 /**
- * Charge le CSV des coordonnées des villes.
+ * Charge le CSV des coordonnï¿½es des villes.
  * 
  * @param [in] f le fichier
  * @param [out] nb_villes le nombre de villes de l'instance
  * @param [out] dist le tableau des nb_villes*nb_villes distances
  * @param [out] absc le tableau des abscisses des villes
- * @param [out] ord le tableau des ordonnées des villes
+ * @param [out] ord le tableau des ordonnï¿½es des villes
  */
 void lire_donnees(const char *f, unsigned int *nb_villes, double ***dist,  double **absc, double **ord)
 {
-  //double *absc; ///tableau des ordonnées
+  //double *absc; ///tableau des ordonnï¿½es
   //double *ord;  /// tableau des abscisses
   char ligne[MAXMOT];
   FILE * fin = fopen(f,"r");
@@ -77,9 +77,9 @@ void lire_donnees(const char *f, unsigned int *nb_villes, double ***dist,  doubl
     {
       (*dist)[i] = (double*) malloc(*nb_villes * sizeof(double));
       for(j = 0; j < *nb_villes; j++)
-	{
-	  (*dist)[i][j] = sqrt( ((*absc)[i] - (*absc)[j])* ((*absc)[i] - (*absc)[j]) + ((*ord)[i] - (*ord)[j]) * ((*ord)[i] - (*ord)[j]) );
-	}
+		{
+		  (*dist)[i][j] = sqrt( ((*absc)[i] - (*absc)[j])* ((*absc)[i] - (*absc)[j]) + ((*ord)[i] - (*ord)[j]) * ((*ord)[i] - (*ord)[j]) );
+		}
     }
 }
 
@@ -88,9 +88,9 @@ void lire_donnees(const char *f, unsigned int *nb_villes, double ***dist,  doubl
  * Supprime la structure des distances
  *
  * @param [in] nb_villes le nombre de villes.
- * @param [in,out] distances le tableau à supprimer.
- * @param [in,out] abscisses un autre tableau à supprimer.
- * @param [in,out] ordonnees encore un autre tableau à supprimer.
+ * @param [in,out] distances le tableau ï¿½ supprimer.
+ * @param [in,out] abscisses un autre tableau ï¿½ supprimer.
+ * @param [in,out] ordonnees encore un autre tableau ï¿½ supprimer.
  */
 void supprimer_distances_et_coordonnees(const int nb_villes, double **distances, double *abscisses, double *ordonnees)
 {
@@ -106,14 +106,14 @@ void supprimer_distances_et_coordonnees(const int nb_villes, double **distances,
 
 
 /**
- * Export le cycle dans un fichier HTML pour pouvoir être visualisé
+ * Export le cycle dans un fichier HTML pour pouvoir ï¿½tre visualisï¿½
  * dans l'applet.
  *
- * @param [in] cycle le cycle à afficher
+ * @param [in] cycle le cycle ï¿½ afficher
  */
 void afficher_cycle_html(const t_cycle cycle, double *posX, double *posY)
 {
-  FILE * fout = fopen("DisplayTsp2.html","w");
+  FILE * fout = fopen("DisplayTsp.html","w");
   if(fout != NULL)
     {
       int i;
@@ -157,7 +157,7 @@ void afficher_distances(const int nb, double **distances)
 
 
 /**
- * Fonction de comparaison pour le trie des arêtes par leur poids.
+ * Fonction de comparaison pour le trie des arï¿½tes par leur poids.
  *
  * @param [in] v1 pointeur vers un triplet (i,j,poids)
  * @param [in] v2 pointeur verts un triplet (i,j,poids)
@@ -182,13 +182,13 @@ int comparer(const void *v1, const void *v2)
 }
 
 /**
- * Construit un tableau de n*(n-1)/2 arêtes trié selon leur poids.
+ * Construit un tableau de n*(n-1)/2 arï¿½tes triï¿½ selon leur poids.
  *
  * @note utile pour le Kruskal
  *
  * @param [in] n le nombre de villes
  * @param [in] d tableau des n x n distances.
- * @return tableau d'arétes triées T[i][j] = poids_ij 
+ * @return tableau d'arï¿½tes triï¿½es T[i][j] = poids_ij 
  */
 double **trier_aretes(const int n, double **d)
 {
@@ -199,7 +199,7 @@ double **trier_aretes(const int n, double **d)
   int i, j;
   int a = 0;
 
-  //On initialise la structure d'arêtes
+  //On initialise la structure d'arï¿½tes
   for(i = 0; i < n-1; i++)
     {
       for(j = i+1; j < n; j++)
@@ -216,7 +216,7 @@ double **trier_aretes(const int n, double **d)
   qsort(T, a, sizeof(T[0]), comparer);
   
 
-  //Decommenter pour vérifier le tri
+  //Decommenter pour vï¿½rifier le tri
   /*
   for(i = 0; i < a; i++)
     printf("%f ", T[i][2]);
@@ -227,10 +227,10 @@ double **trier_aretes(const int n, double **d)
 
 
 /**
- * Supprime le tableau des arêtes.
+ * Supprime le tableau des arï¿½tes.
  *
  * @param [in] nb_villes le nombre de villes
- * @param [in,out] T le tableau à supprimer
+ * @param [in,out] T le tableau ï¿½ supprimer
  */
 void supprimer_aretes(const int nb_villes, double **T)
 {
@@ -244,15 +244,34 @@ void supprimer_aretes(const int nb_villes, double **T)
   free(T);
 }
 
+/**
+ * Calcul de l'algo naif du traveling-salesman
+ *
+ * @param [n] nb_villes le nombre de villes
+ * @param [n] T le tableau ï¿½ supprimer
+ */
 
-void pcv_exact_naif (int n , double **dist ,t_cycle *chemin , t_cycle *meilleur)
+void pcv_exact_naif (int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
-	for(int i=chemin->taille+1 ; i<n ; i++){
-		if(chemin->taille==n){
+	int i;
+	for(i = chemin->taille+1 ; i<n ; i++)
+	{
+		if (chemin->taille == n)
+		{
 			//Comparaison entre chemin et meilleur
 			if(chemin->poids < meilleur->poids){
-				meilleur = chemin;
+				meilleur = chemin; //La valeur mais pas le pointeur!
 			}
+		}
+		else
+		{
+			chemin->poids += dist[chemin->c[chemin->taille]][i];
+			chemin->taille++;
+			pvc_exact_naif(n,dist,chemin,meilleur);
+			chemin->taille--;
+			chemin->poids-=dist[chemin->c[chemin->taille]][i];
+		}
+	}
 }
 
 
@@ -274,12 +293,12 @@ int main (int argc, char *argv[])
   //Exemple de mesure du temps
   lire_donnees("defi250.csv", &nb_villes, &distances, &abscisses, &ordonnees);
 
-  //Récupération du timer et affichage
+  //Rï¿½cupï¿½ration du timer et affichage
   struct timespec current;
   clock_gettime(CLOCK_REALTIME, &current); //Linux gettime
   double elapsed_in_ms =    (( current.tv_sec - myTimerStart.tv_sec) *1000 +
           ( current.tv_nsec - myTimerStart.tv_nsec)/1000000.0);
-  printf("Temps passé (ms) : %lf\n", elapsed_in_ms);
+  printf("Temps passï¿½ (ms) : %lf\n", elapsed_in_ms);
 
 
   //Affichage des distances
