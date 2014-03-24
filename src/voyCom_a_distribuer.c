@@ -113,11 +113,13 @@ void supprimer_distances_et_coordonnees(const int nb_villes, double **distances,
  */
 void afficher_cycle_html(const t_cycle cycle, double *posX, double *posY)
 {
-  FILE * fout = fopen("DisplayTsp.html","w");
+  FILE * fout = fopen("src/DisplayTsp.html","w");
+
+
   if(fout != NULL)
     {
       int i;
-      fprintf(fout, "<html>\n <applet codebase=\".\" code=\"DisplayTsp.class\" width=200 height=200>\n");
+      fprintf(fout, "<html>\n <applet codebase=\".\" code=\"DisplayTsp.class\" width=600 height=600>\n");
       fprintf(fout, "<param name = Problem value = \"custom\">\n");
       fprintf(fout, "<param name = Problem CitiesPosX value = \"");
       for(i = 0; i < cycle.taille; i++)
@@ -133,6 +135,10 @@ void afficher_cycle_html(const t_cycle cycle, double *posX, double *posY)
 	fprintf(fout,"-%d",cycle.c[i]);
       fprintf(fout,"\">\n</applet>\n </html>\n");
     }
+  else
+  {
+	  printf("Erreur d'écriture dans le fichier");
+  }
   fclose(fout);
 }
 
@@ -288,38 +294,51 @@ void supprimer_aretes(const int nb_villes, double **T)
 
 void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
-	int i;
 
-	if (chemin->taille == n )
+
+	if (chemin->taille == n - 1 ) // tableau commence a 0
 	{
 
 		//Comparaison entre chemin et meilleur
-		if(chemin->poids < meilleur->poids){
-			*meilleur = *chemin;//La valeur mais pas le pointeur!
+		if( (chemin->poids <= meilleur->poids) || (meilleur->taille == 0 ) )
+		{
+			meilleur->taille = chemin->taille;
+			meilleur->poids = chemin->poids;
+			int i;
+			for (i=0;i<=n;i++)
+			{
+				meilleur->c[i]=chemin->c[i];
+			}
 		}
 	}
 	else
 	{
-
+		int i;
 		for(i = 0 ; i<n ; i++)
 		{
 			int j;
-			int bool=1;
-			for ( j = 0;j<chemin->taille; j++)
+			int bool = 1;
+
+			for ( j = 0;j <= chemin->taille; j++)
 			{
 				if (chemin->c[j] == i )
 				{
-					bool=0;
+					bool = 0;
 				}
 			}
+			if (i==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
+				bool=0;
 			if (bool) //bool=1
 			{
+
 				chemin->poids += dist[chemin->c[chemin->taille]][i];
 				chemin->taille++;
 				chemin->c[chemin->taille]=i;
 				pvc_exact_naif( n, dist, chemin, meilleur);
+				chemin->c[chemin->taille]=0;
 				chemin->taille--;
 				chemin->poids -= dist[chemin->c[chemin->taille]][i];
+
 			}
 		}
 	}
@@ -341,9 +360,11 @@ int main (int argc, char *argv[])
   t_cycle chemin;
   t_cycle meilleur;
   	  //---------------------------Init des structs
-  chemin.taille = 0;
-  chemin.c[0]=0;
-  meilleur.taille = nb_villes;
+  chemin.taille = 0;// ville 0;
+  chemin.poids = 0;
+  chemin.c[0] = 0;
+  meilleur.taille = 0;
+  meilleur.poids=10000;
   meilleur.c[0]=0;
 
 
@@ -361,17 +382,10 @@ int main (int argc, char *argv[])
   printf("Temps pass� (ms) : %lf\n", elapsed_in_ms);
 
 
-  //Affichage des distances
-//  afficher_distances(nb_villes,distances);
+  // Affichage des distances
+  //afficher_distances(nb_villes,distances);
 
-  //naif
-
-  t_cycle cycle;
-  cycle.taille=3;
-  cycle.c[0]=0;
-  cycle.c[1]=1;
-  cycle.c[2]=2;
-  afficher_cycle_html(cycle, abscisses, ordonnees);
+  afficher_cycle_html(meilleur, abscisses, ordonnees);
   
   double ** Aretes =  trier_aretes(nb_villes, distances);
   /// <-- Kruskal Here
