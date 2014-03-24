@@ -295,55 +295,56 @@ void supprimer_aretes(const int nb_villes, double **T)
 void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
 
-
-	if (chemin->taille == n - 1 ) // tableau commence a 0
+	if (meilleur->poids > chemin->poids) //Qu2 : Enleve les tests inutiles
 	{
-
-		//Comparaison entre chemin et meilleur
-		if( (chemin->poids <= meilleur->poids) || (meilleur->taille == 0 ) )
+		if (chemin->taille == n - 1 ) // tableau commence a 0
 		{
-			meilleur->taille = chemin->taille;
-			meilleur->poids = chemin->poids;
-			int i;
-			for (i=0;i<=n;i++)
-			{
-				meilleur->c[i]=chemin->c[i];
-			}
-		}
-	}
-	else
-	{
-		int i;
-		for(i = 0 ; i<n ; i++)
-		{
-			int j;
-			int bool = 1;
 
-			for ( j = 0;j <= chemin->taille; j++)
+			//Comparaison entre chemin et meilleur
+			if( (chemin->poids <= meilleur->poids) || (meilleur->taille == 0 ) )
 			{
-				if (chemin->c[j] == i )
+				meilleur->taille = chemin->taille;
+				meilleur->poids = chemin->poids;
+				int i;
+				for (i=0;i<=n;i++)
 				{
-					bool = 0;
+					meilleur->c[i]=chemin->c[i];
 				}
 			}
-			if (i==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
-				bool=0;
-			if (bool) //bool=1
+		}
+		else
+		{
+			int i;
+			for(i = 0 ; i<n ; i++)
 			{
+				int j;
+				int bool = 1;
 
-				chemin->poids += dist[chemin->c[chemin->taille]][i];
-				chemin->taille++;
-				chemin->c[chemin->taille]=i;
-				pvc_exact_naif( n, dist, chemin, meilleur);
-				chemin->c[chemin->taille]=0;
-				chemin->taille--;
-				chemin->poids -= dist[chemin->c[chemin->taille]][i];
+				for ( j = 0;j <= chemin->taille; j++)
+				{
+					if (chemin->c[j] == i )
+					{
+						bool = 0;
+					}
+				}
+				if (i==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
+					bool=0;
+				if (bool) //bool=1
+				{
 
+					chemin->poids += dist[chemin->c[chemin->taille]][i];
+					chemin->taille++;
+					chemin->c[chemin->taille]=i;
+					pvc_exact_naif( n, dist, chemin, meilleur);
+					chemin->c[chemin->taille]=0;
+					chemin->taille--;
+					chemin->poids -= dist[chemin->c[chemin->taille]][i];
+
+				}
 			}
 		}
 	}
 }
-
 
 /**
  * Fonction main.
