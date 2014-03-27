@@ -253,60 +253,81 @@ void supprimer_aretes(const int nb_villes, double **T)
 /**
  * Calcul de l'algo naif du traveling-salesman
  *
- * @param [n] nb_villes le nombre de villes
- * @param [n] T le tableau � supprimer
  */
-
-//void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
-//{
-//	int i;
-//		if (chemin->taille == n )
-//		{
-//
-//			//Comparaison entre chemin et meilleur
-//			if(chemin->poids < meilleur->poids){
-//				printf("Poids1 : %f",meilleur->poids);
-//				*meilleur = *chemin;//La valeur mais pas le pointeur!
-//				printf("Poids2 : %f",meilleur->poids);
-//
-////				meilleur->poids = chemin->poids;
-////				meilleur->taille = chemin->taille;
-////				int k;
-////				for (k = 0; k < MAXS; k++)
-////				{
-////					meilleur->c[k] = chemin->c[MAXS];
-////				}
-//			}
-//		}
-//		else
-//		{
-//
-//			chemin->poids += dist[chemin->c[chemin->taille]][i];
-//			chemin->taille++;
-//			chemin->c[chemin->taille]=i ;
-//			pvc_exact_naif( n, dist, chemin, meilleur);
-//			chemin->taille--;
-//			chemin->poids-=dist[chemin->c[chemin->taille]][i];
-//		}
-//	}
-//}
-
-
-void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
+void pvc_exact_naif (const int nbVilles , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
 
+	//On test si un chemin est complet
+	if (chemin->taille == nbVilles - 1 ) // n-1 car taille compte les arrêtes : jonctions entre villes
+	{
+
+		//Comparaison entre chemin et meilleur
+		if( (chemin->poids <= meilleur->poids) || (meilleur->taille == 0 ) ) //meilleur->taille = 0 -->Initialisation
+		{
+			//Copie de chemin dans meilleur ->Copie de valeur, surtout pas d'adresse
+			meilleur->taille = chemin->taille;
+			meilleur->poids = chemin->poids;
+			int i;
+			for (i=0;i<=nbVilles;i++)
+			{
+				meilleur->c[i]=chemin->c[i];
+			}
+		}
+	}
+	else
+	{
+		//Si le chemin n'est pas complet on parcours toutes les villes pour calculer des nouveaux chemins
+		int iterVilles;
+		for(iterVilles = 0 ; iterVilles<nbVilles ; iterVilles++)
+		{
+			int villesParcourues;
+			int bool = 1;
+			//Si la ville est déjà dans le chemin, bool devient false et on ne traite pas l'étape suivante
+			for ( villesParcourues = 0;villesParcourues <= chemin->taille; villesParcourues++)
+			{
+				if (chemin->c[villesParcourues] == iterVilles )
+				{
+					bool = 0;
+				}
+			}
+			if (iterVilles==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
+				bool=0;
+			//Etape de construction des chemins
+			if (bool)
+			{
+				//Calcul du poids entre la dernière ville parcourue et la ville actuelle
+				chemin->poids += dist[chemin->c[chemin->taille]][iterVilles];
+				chemin->taille++;
+				//On place la nouvelle ville dans le tableau c[] dans une nouvelle case
+				chemin->c[chemin->taille]=iterVilles;
+				//Appel recursif pour terminer le chemin en cours
+				pvc_exact_naif( nbVilles, dist, chemin, meilleur);
+				//Suppression des modifs pour pouvoir redonner un chemin "clean" dans la suite de la boucle courante
+				chemin->c[chemin->taille]=0;
+				chemin->taille--;
+				chemin->poids -= dist[chemin->c[chemin->taille]][iterVilles];
+			}
+		}
+	}
+}
+
+
+void pvc_exact_branch_and_bound (const int nbVilles , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
+{
 	if (meilleur->poids > chemin->poids) //Qu2 : Enleve les tests inutiles
 	{
-		if (chemin->taille == n - 1 ) // tableau commence a 0
+		//On test si un chemin est complet
+		if (chemin->taille == nbVilles  ) // n-1 car taille compte les arrêtes : jonctions entre villes
 		{
 
 			//Comparaison entre chemin et meilleur
-			if( (chemin->poids <= meilleur->poids) || (meilleur->taille == 0 ) )
+			if( (chemin->poids <= meilleur->poids) || (meilleur->taille == 0 ) ) //meilleur->taille = 0 -->Initialisation
 			{
+				//Copie de chemin dans meilleur ->Copie de valeur, surtout pas d'adresse
 				meilleur->taille = chemin->taille;
 				meilleur->poids = chemin->poids;
 				int i;
-				for (i=0;i<=n;i++)
+				for (i=0;i<=nbVilles;i++)
 				{
 					meilleur->c[i]=chemin->c[i];
 				}
@@ -314,38 +335,106 @@ void pvc_exact_naif (const int n , double ** dist ,t_cycle * chemin , t_cycle * 
 		}
 		else
 		{
-			int i;
-			for(i = 0 ; i<n ; i++)
+			//Si le chemin n'est pas complet on parcours toutes les villes pour calculer des nouveaux chemins
+			int iterVilles;
+			for(iterVilles = 0 ; iterVilles<nbVilles ; iterVilles++)
 			{
-				int j;
+				int villesParcourues;
 				int bool = 1;
-
-				for ( j = 0;j <= chemin->taille; j++)
+				//Si la ville est déjà dans le chemin, bool devient false et on ne traite pas l'étape suivante
+				for ( villesParcourues = 0;villesParcourues <= chemin->taille; villesParcourues++)
 				{
-					if (chemin->c[j] == i )
+					if (chemin->c[villesParcourues] == iterVilles )
 					{
 						bool = 0;
 					}
 				}
-				if (i==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
+				if (iterVilles==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
 					bool=0;
-				if (bool) //bool=1
+				//Etape de construction des chemins
+				if (bool)
 				{
-
-					chemin->poids += dist[chemin->c[chemin->taille]][i];
+					//Calcul du poids entre la dernière ville parcourue et la ville actuelle
+					chemin->poids += dist[chemin->c[chemin->taille]][iterVilles];
 					chemin->taille++;
-					chemin->c[chemin->taille]=i;
-					pvc_exact_naif( n, dist, chemin, meilleur);
+					//On place la nouvelle ville dans le tableau c[] dans une nouvelle case
+					chemin->c[chemin->taille]=iterVilles;
+					//Appel recursif pour terminer le chemin en cours
+					pvc_exact_branch_and_bound( nbVilles, dist, chemin, meilleur);
+					//Suppression des modifs pour pouvoir redonner un chemin "clean" dans la suite de la boucle courante
 					chemin->c[chemin->taille]=0;
 					chemin->taille--;
-					chemin->poids -= dist[chemin->c[chemin->taille]][i];
-
+					chemin->poids -= dist[chemin->c[chemin->taille]][iterVilles];
 				}
 			}
 		}
+
 	}
+
 }
 
+
+void pvc_approche_ppv(const int nbVilles , double ** dist , t_cycle * meilleur, t_cycle * chemin)
+{
+
+	//On test si un chemin est complet
+	if (chemin->taille == nbVilles - 1 ) // n-1 car taille compte les arrêtes : jonctions entre villes
+	{
+
+		chemin->c[nbVilles]=chemin->c[0];
+		chemin->poids += dist[chemin->c[chemin->taille]][chemin->c[0]];
+		chemin->taille++;
+		//Copie de chemin dans meilleur ->Copie de valeur, surtout pas d'adresse
+		meilleur->taille = chemin->taille;
+		meilleur->poids = chemin->poids;
+		int i;
+		for (i=0;i<=nbVilles;i++)
+		{
+			meilleur->c[i]=chemin->c[i];
+		}
+	}
+	else
+	{
+		static int tmp = 2;
+		int iterVilles;
+		if (tmp <9)tmp++;else(tmp--);//modifie la valeur de tmp pour éviter le test de distance entre une ville et elle meme
+
+		for(iterVilles = 0 ; iterVilles<nbVilles ; iterVilles++)
+		{
+				int villesParcourues;
+				int bool = 1;
+
+				//Si la ville est déjà dans chemin, bool devient false et on ne traite pas l'étape suivante
+				for ( villesParcourues = 0;villesParcourues <= chemin->taille; villesParcourues++)
+				{
+					if (chemin->c[villesParcourues] == iterVilles )
+					{
+						bool = 0;
+					}
+				}
+
+
+				//Etape de construction des chemins
+				if (bool)
+				{
+					if ( (iterVilles != chemin->c[chemin->taille]) && (dist[chemin->c[chemin->taille]][tmp] > dist[chemin->c[chemin->taille]][iterVilles]) )
+					{
+						tmp = iterVilles;
+					}
+				}
+		}
+
+		//printf("temp : %d \n",tmp);
+		//Ajout du poids entre la dernière ville parcourue et la ville actuelle
+		chemin->poids += dist[chemin->c[chemin->taille]][tmp];
+		chemin->taille++;
+		//On place la nouvelle ville dans le tableau c[] dans une nouvelle case
+		chemin->c[chemin->taille]=tmp;
+		//Appel recursif pour terminer le chemin en cours
+			pvc_approche_ppv( nbVilles, dist, chemin, meilleur);
+
+	}
+}
 /**
  * Fonction main.
  */
@@ -357,13 +446,14 @@ int main (int argc, char *argv[])
   unsigned int nb_villes;
 
   //Exemple de mesure du temps
-  lire_donnees("src/defi10.csv", &nb_villes, &distances, &abscisses, &ordonnees);
+  lire_donnees("src/defi250.csv", &nb_villes, &distances, &abscisses, &ordonnees);
   t_cycle chemin;
   t_cycle meilleur;
+  nb_villes = 10;
   	  //---------------------------Init des structs
   chemin.taille = 0;// ville 0;
   chemin.poids = 0;
-  chemin.c[0] = 0;
+  chemin.c[0] = 0;//on démarre de la ville 0
   meilleur.taille = 0;
   meilleur.poids=10000;
   meilleur.c[0]=0;
@@ -374,17 +464,20 @@ int main (int argc, char *argv[])
   struct timespec myTimerStart;
   clock_gettime(CLOCK_REALTIME, &myTimerStart);
 
-  pvc_exact_naif(nb_villes,distances,&chemin,&meilleur);
+  //pvc_approche_ppv(nb_villes,distances,&chemin,&meilleur);
+  pvc_exact_branch_and_bound(nb_villes,distances,&chemin,&meilleur);
+//  pvc_exact_naif(nb_villes,distances,&chemin,&meilleur);
+
   //R�cup�ration du timer et affichage
   struct timespec current;
   clock_gettime(CLOCK_REALTIME, &current); //Linux gettime
   double elapsed_in_ms =    (( current.tv_sec - myTimerStart.tv_sec) *1000 +
           ( current.tv_nsec - myTimerStart.tv_nsec)/1000000.0);
-  printf("Temps pass� (ms) : %lf\n", elapsed_in_ms);
-
+  printf("Temps passé (ms) : %lf\n", elapsed_in_ms);
 
   // Affichage des distances
   //afficher_distances(nb_villes,distances);
+
 
   afficher_cycle_html(meilleur, abscisses, ordonnees);
   
