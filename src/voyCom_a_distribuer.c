@@ -122,16 +122,16 @@ void afficher_cycle_html(const t_cycle cycle, double *posX, double *posY)
       fprintf(fout, "<html>\n <applet codebase=\".\" code=\"DisplayTsp.class\" width=600 height=600>\n");
       fprintf(fout, "<param name = Problem value = \"custom\">\n");
       fprintf(fout, "<param name = Problem CitiesPosX value = \"");
-      for(i = 0; i < cycle.taille; i++)
+      for(i = 1; i <= cycle.taille; i++)
 	fprintf(fout,"%f;",posX[i]);
       fprintf(fout, "\">\n");
       fprintf(fout, "<param name = Problem CitiesPosY value = \"");
-      for(i = 0; i < cycle.taille; i++)
+      for(i = 1; i <= cycle.taille; i++)
 	fprintf(fout,"%f;",posY[i]);
       fprintf(fout, "\">\n");
       fprintf(fout, "<param name = Parcours value = \"");
       fprintf(fout,"%d",cycle.c[0]);
-      for(i = 1; i < cycle.taille; i++)
+      for(i = 1; i <= cycle.taille; i++)
 	fprintf(fout,"-%d",cycle.c[i]);
       fprintf(fout,"\">\n</applet>\n </html>\n");
     }
@@ -256,7 +256,6 @@ void supprimer_aretes(const int nb_villes, double **T)
  */
 void pvc_exact_naif (const int nbVilles , double ** dist ,t_cycle * chemin , t_cycle * meilleur)
 {
-
 	//On test si un chemin est complet
 	if (chemin->taille == nbVilles - 1 ) // n-1 car taille compte les arrêtes : jonctions entre villes
 	{
@@ -268,7 +267,7 @@ void pvc_exact_naif (const int nbVilles , double ** dist ,t_cycle * chemin , t_c
 			meilleur->taille = chemin->taille;
 			meilleur->poids = chemin->poids;
 			int i;
-			for (i=0;i<=nbVilles;i++)
+			for (i=0;i<nbVilles;i++)
 			{
 				meilleur->c[i]=chemin->c[i];
 			}
@@ -278,7 +277,7 @@ void pvc_exact_naif (const int nbVilles , double ** dist ,t_cycle * chemin , t_c
 	{
 		//Si le chemin n'est pas complet on parcours toutes les villes pour calculer des nouveaux chemins
 		int iterVilles;
-		for(iterVilles = 0 ; iterVilles<nbVilles ; iterVilles++)
+		for(iterVilles = 1 ; iterVilles<nbVilles ; iterVilles++)
 		{
 			int villesParcourues;
 			int bool = 1;
@@ -290,8 +289,7 @@ void pvc_exact_naif (const int nbVilles , double ** dist ,t_cycle * chemin , t_c
 					bool = 0;
 				}
 			}
-			if (iterVilles==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
-				bool=0;
+
 			//Etape de construction des chemins
 			if (bool)
 			{
@@ -317,7 +315,7 @@ void pvc_exact_branch_and_bound (const int nbVilles , double ** dist ,t_cycle * 
 	if (meilleur->poids > chemin->poids) //Qu2 : Enleve les tests inutiles
 	{
 		//On test si un chemin est complet
-		if (chemin->taille == nbVilles  ) // n-1 car taille compte les arrêtes : jonctions entre villes
+		if (chemin->taille == nbVilles-1  ) // n-1 car taille compte les arrêtes : jonctions entre villes
 		{
 
 			//Comparaison entre chemin et meilleur
@@ -337,7 +335,7 @@ void pvc_exact_branch_and_bound (const int nbVilles , double ** dist ,t_cycle * 
 		{
 			//Si le chemin n'est pas complet on parcours toutes les villes pour calculer des nouveaux chemins
 			int iterVilles;
-			for(iterVilles = 0 ; iterVilles<nbVilles ; iterVilles++)
+			for(iterVilles = 1 ; iterVilles<nbVilles ; iterVilles++)
 			{
 				int villesParcourues;
 				int bool = 1;
@@ -349,8 +347,8 @@ void pvc_exact_branch_and_bound (const int nbVilles , double ** dist ,t_cycle * 
 						bool = 0;
 					}
 				}
-				if (iterVilles==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
-					bool=0;
+//				if (iterVilles==0)	//Test pour le premier passage, taille = 0 ne rentre pas dans la boucle alors qu'on le devrait
+//					bool=0;
 				//Etape de construction des chemins
 				if (bool)
 				{
@@ -449,7 +447,6 @@ int main (int argc, char *argv[])
   lire_donnees("src/defi250.csv", &nb_villes, &distances, &abscisses, &ordonnees);
   t_cycle chemin;
   t_cycle meilleur;
-  nb_villes = 10;
   	  //---------------------------Init des structs
   chemin.taille = 0;// ville 0;
   chemin.poids = 0;
@@ -457,6 +454,7 @@ int main (int argc, char *argv[])
   meilleur.taille = 0;
   meilleur.poids=10000;
   meilleur.c[0]=0;
+  nb_villes = 250;
 
 
 
@@ -464,9 +462,9 @@ int main (int argc, char *argv[])
   struct timespec myTimerStart;
   clock_gettime(CLOCK_REALTIME, &myTimerStart);
 
-  //pvc_approche_ppv(nb_villes,distances,&chemin,&meilleur);
-  pvc_exact_branch_and_bound(nb_villes,distances,&chemin,&meilleur);
-//  pvc_exact_naif(nb_villes,distances,&chemin,&meilleur);
+  pvc_approche_ppv(nb_villes,distances,&chemin,&meilleur);
+ // pvc_exact_branch_and_bound(nb_villes,distances,&chemin,&meilleur);
+  	//pvc_exact_naif(nb_villes,distances,&chemin,&meilleur);
 
   //R�cup�ration du timer et affichage
   struct timespec current;
