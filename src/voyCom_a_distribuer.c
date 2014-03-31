@@ -19,16 +19,6 @@ typedef struct t_cycle
   int c[MAXS];  //liste des "taille" sommets
 } t_cycle;
 
-// t_cycle* copie_cycle( const t_cycle src){
-//	this.taille = src.taille;
-//	this.poids = src.poids;
-//	for(int i = 0 ; i < src.taille ; i++)
-//	{
-//		this.c[i]=src.c[i];
-//	}
-//	return *this;
-//}
-
 /**
  * Charge le CSV des coordonn�es des villes.
  * 
@@ -222,12 +212,11 @@ double **trier_aretes(const int n, double **d)
   qsort(T, a, sizeof(T[0]), comparer);
   
 
-  //Decommenter pour v�rifier le tri
-  /*
-  for(i = 0; i < a; i++)
-    printf("%f ", T[i][2]);
-  printf("\n");
-  */
+//Décommenter pour voir le resultat du tri
+//  for(i = 0; i < a; i++)
+//    printf("%f " T[i][2]);
+//  printf("\n");
+
   return T;
 }
 
@@ -249,6 +238,8 @@ void supprimer_aretes(const int nb_villes, double **T)
 
   free(T);
 }
+
+
 
 /**
  * Calcul de l'algo naif du traveling-salesman
@@ -433,6 +424,96 @@ void pvc_approche_ppv(const int nbVilles , double ** dist , t_cycle * meilleur, 
 
 	}
 }
+
+
+int rechercherRacine(int ** parent, const int n )
+{
+	while (parent[n]!=n)
+	{
+		n = parent[n];// n récupère la valeur de son parent direct
+	}
+	return n;
+}
+
+
+t_cycle calcul_acm(const int nb_villes, double ** Aretes)
+{
+  int nbreArretes = 0;
+  int k;//Iterateur des aretes de l'arbre
+
+  int parent[nb_villes][2];
+  int hauteur[nb_villes];
+  for (k = 0 ; k < nb_villes ; k++)
+  {
+	  parent[k]=k; //Initialisation : chaque ville est son propre parent
+	  hauteur[k]=0;
+  }
+  int r1;
+  int r2;
+  for (k = 0 ; nbreArretes < nb_villes-1 ; k++)
+  {
+
+	  r1 = rechercherRacine(parent, Aretes[k][0]);
+	  r2 = rechercherRacine(parent, Aretes[k][1]);
+	  if (r1 != r2)
+	  {
+		  nbreArretes++;
+		  if ( hauteur[r1] > hauteur[r2] )
+		  {
+			  if (r2 != Aretes[k][1])
+			  {
+				  int v1=Aretes[k][0];
+				  int v2=Aretes[k][1];
+				  int tampon;
+				  //Pi[r2]<-r1 Racine de r2 = r1
+				  while ( parent[v2] != v2 )
+				  {
+					  tampon = parent[v2];
+					  parent[v2] = v1;
+					  v1 = v2;
+					  v2 = tampon;
+				  }
+			  }
+
+			  parent[Aretes[k][1]] = Aretes[k][0]; // On relie les deux arbres par les 2villes de l'arrete
+     		  hauteur[r1]=hauteur[r2]+1;
+			  hauteur[r2]=0;
+		  }
+		  else
+		  {
+			  if (r1 != Aretes[k][0])
+			  {
+				  int v1=Aretes[k][0];
+				  int v2=Aretes[k][1];
+				  int tampon;
+				  //Pi[r2]<-r1 Racine de r2 = r1
+				  while ( parent[v1] != v1 )
+				  {
+					  tampon = parent[v1];
+					  parent[v1] = v2;
+					  v2 = v1;
+					  v1 = tampon;
+				  }
+			  }
+
+			  //Pi[r1]<-r2
+			  parent[Aretes[k][0]][0] = Aretes[k][1]; //
+			  hauteur[r2]=hauteur[r1]+1;
+			  hauteur[r1]=0;
+		  }
+	  }
+  }
+
+  t_cycle chemin;
+  for (k = 0; k <nb_villes; k++)
+  {
+	  //Création d'un cycle
+	  //chemin.c[k]=
+  }
+
+}
+
+
 /**
  * Fonction main.
  */
@@ -479,8 +560,10 @@ int main (int argc, char *argv[])
 
   afficher_cycle_html(meilleur, abscisses, ordonnees);
   
-  double ** Aretes =  trier_aretes(nb_villes, distances);
+
   /// <-- Kruskal Here
+
+  double ** Aretes =  trier_aretes(nb_villes, distances);
   supprimer_aretes(nb_villes, Aretes);
 
   supprimer_distances_et_coordonnees(nb_villes, distances, abscisses, ordonnees);
